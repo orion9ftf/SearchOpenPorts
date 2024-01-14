@@ -13,7 +13,7 @@ def escanner_ports(ip, ports)
 end
 
 if ARGV.length < 1
-  puts "Uso: ruby search.rb <IP o dominio> [ports]"
+  puts "Uso: ruby search_open_ports.rb <IP o dominio> [ports]"
   exit
 end
 
