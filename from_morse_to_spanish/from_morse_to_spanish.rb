@@ -34,5 +34,4 @@ input_morse = gets.chomp
 decoded_text = morse_to_text(input_morse, morse_dict)
 
 # Mostrar el resultado
-puts "El código Morse corresponde a: #{decoded_text}"
-
+puts "El código Morse corresponde a: #{decoded_text}".downcase
