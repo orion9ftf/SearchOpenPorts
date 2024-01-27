@@ -1,3 +1,4 @@
+# revisar...
 def verify_password(user, password_entered, password_file)
   password = File.readlines(password_file).map(&:chomp)
 

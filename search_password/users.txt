@@ -1,0 +1,6 @@
+admin
+admin1
+administrador
+administrator
+user
+user1
