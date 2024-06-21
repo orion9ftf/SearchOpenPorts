@@ -6,3 +6,5 @@
 * Cookies ~> [cookies](cookies)
 * Buscar contraseña ~> [contraseñas](search_password)
 * XSS ~> [xss](XSS) 
+* Reverse shell ~> [reverse shell](reverse-shell)
+* Encryption ~> [encryption](encryption)
