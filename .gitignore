@@ -1,2 +1,9 @@
 # ignore:
 password_list.txt
+priv.pem
+pub.pem
+ver.py
+web-*
+probar*
+prueba*
+/proyecto*

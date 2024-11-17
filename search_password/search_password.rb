@@ -10,9 +10,6 @@ end
 
 # Nombre del archivo que contiene las contraseñas
 password_file = "password.txt"
-
 puts "Ingrese la contraseña:"
 password_entered = gets.chomp
-
 verify_password(password_entered, password_file)
-

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+</head>
+<body>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" pattern="^[a-zA-Z0-9]{1,10}$" required="">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" pattern="^[a-d]{3}[0-3]{3}$" required="">
+        <br>
+        <button type="submit">Login</button>
+    </form>
+    <div id="responseServer"></div>
+
+    <script>
+        function encryptRSA(plainText, publicKeyPem) {
+            const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+            const encrypted = publicKey.encrypt(plainText, 'RSA-OAEP', {
+                md: forge.md.sha256.create(),
+            });
+            return forge.util.encode64(encrypted);
+        }
+
+        function encryptAES(plainText, secretKey) {
+            let iv = forge.random.getBytesSync(16);
+            let cipher = forge.cipher.createCipher('AES-CBC', secretKey);
+            cipher.start({ iv: iv });
+            cipher.update(forge.util.createBuffer(plainText));
+            cipher.finish();
+            let encrypted = forge.util.encode64(cipher.output.getBytes());
+            return {
+                _: encrypted,
+                __: forge.util.encode64(iv),
+            };
+        }
+
+        function decryptAES(encryptedText, secretKey, iv) {
+            let decipher = forge.cipher.createDecipher('AES-CBC', secretKey);
+            decipher.start({ iv: forge.util.decode64(iv) });
+            decipher.update(forge.util.createBuffer(forge.util.decode64(encryptedText)));
+            decipher.finish();
+            return decipher.output.toString();
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+
+            if (username.length < 1 || password.length < 1) {
+                return;
+            }
+
+            let payload = JSON.stringify({
+                srv: '/private/auth/',
+                data: {
+                    usr: username,
+                    pwd: password,
+                },
+            });
+
+            fetch('/public-key', { method: 'POST' })
+                .then(response => response.text())
+                .then(publicKey => {
+                    let secretKey = forge.random.getBytesSync(16);
+                    let encryptedSecretKey = encryptRSA(secretKey, publicKey);
+                    let encryptedPayload = encryptAES(payload, secretKey);
+                    encryptedPayload['___'] = encryptedSecretKey;
+
+                    return fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(encryptedPayload),
+                    });
+                })
+                .then(response => response.text())
+                .then(encryptedResponse => {
+                    let responseJson = JSON.parse(encryptedResponse);
+                    return decryptAES(responseJson['_'], secretKey, responseJson['__']);
+                })
+                .then(decryptedResponse => JSON.parse(decryptedResponse))
+                .then(finalResponse => {
+                    let responseText = '[ Access Denied: ' + new Date().toISOString() + ' ]';
+                    if (finalResponse.code === 200) {
+                        responseText = JSON.stringify(finalResponse);
+                    }
+                    document.getElementById('responseServer').textContent = responseText;
+                });
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', submitForm);
+    </script>
+</body>
+</html>

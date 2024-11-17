@@ -13,7 +13,7 @@ def morse_to_text(morse_code, morse_dict)
   text = ''
   morse_words = morse_code.split('   ') # Separar palabras
   morse_words.each do |word|
-    morse_chars = word.split(' ') # Separar caracteres
+    morse_chars = word.split(' ')       # Separar caracteres
     morse_chars.each do |char|
       if morse_dict.key?(char)
         text += morse_dict[char]
